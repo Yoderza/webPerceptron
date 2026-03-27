@@ -1,34 +1,112 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebPerceptron</title>
+
+
+
+    <style>
+        body { font-family: monospace; 
+               display: flex;
+               flex-direction: column;
+               align-items: center;
+               padding: 2rem;
+               gap: 1rem; 
+            }
+        h2 { margin: 0; }
+        .grid { display: grid; 
+                grid-template-columns: repeat(4, 50px); 
+                gap: 4px; 
+            }
+        .cell {
+            width: 50px; height: 50px;
+            background: #eee; border: 1px solid #ccc;
+            cursor: pointer; border-radius: 4px;
+        }
+        .cell.on { background: #222; }
+        .output { font-size: 1.2rem; }
+        button { font-family: monospace; 
+                 padding: 0.4rem 0.8rem; 
+                 cursor: pointer; 
+                }
+    </style>
+
+<script>
+    
+const weights = [ 0.01,  0.06,  0.03, -0.01,
+                 -0.06,  0.05,  0.06, -0.04,
+                  0.01,  0.06,  0.05, -0.10,
+                 -0.02,  0.02,  0.04, -0.02 ];
+const bias = -0.08;
+const state = new Array(16).fill(0);
+
+   const indexMap = [
+  0, 1, 2, 3,
+  4, 5, 6, 7,
+  8, 9,10,11,
+ 12,13,14,15
+];
+
+window.onload = () => {  
+    const gridEl = document.getElementById('grid');
+
+    for (let uiIndex = 0; uiIndex < 16; uiIndex++) {
+        const modelIndex = indexMap[uiIndex];
+
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+
+        cell.addEventListener('click', () => {
+            state[modelIndex] ^= 1;
+            cell.classList.toggle('on', state[modelIndex] === 1);
+            infer();
+        });
+
+        gridEl.appendChild(cell);
+    }
+};
+
+</script>
+
 </head>
 <body>
 
-  <button id="predict">Predict</button>
+<h2>L / T Perceptron</h2>
+
+<div class="grid" id="grid"></div>
+
+<div class="output">
+  <div>z = <span id="z">0.000</span></div>
+  <div>class = <span id="cls">—</span></div>
+</div>
+
+<div style="display:flex;gap:0.5rem">
+  <button onclick="clearGrid()">Clear</button>
   <p id="output"></p>
-
+</div>
+<!-- JS -->
   <script>
-    weights = Array(16).fill(0);
-    weights[0] = ?? ;
-    weights[1] = ?? ;
-    ...
-    weights[15] = ??;
     
-    bias = ?? ;
-
-    activation_function(z) {
-        return z >= 0 ? 1 : -1;
-    }
-    
-    predict( inputs ) {
-          let linear_product = np.dot(inputs, weights) + bias    
-          y_pred  = activation_function(    linear_product    );
-          return y_pred
+    function clearGrid() {
+      const cells = document.querySelectorAll('.cell');
+      cells.forEach(cell => cell.classList.remove('on'));
+      state.fill(0);
+      infer();
     }
 
+    function infer() {
+        // computer z (linear product)
+        const z = state.reduce((sum, v, i) => sum + weights[i] * v, bias);
+        // activation function 
+        const y_pred =z >= 0 ? 1 : -1;
+        // update UI
+        document.getElementById('z').textContent = z.toFixed(3);
+        // class label
+        document.getElementById('cls').textContent = y_pred === 1 ? 'T' : 'L';
+    }
 
-   
-    
   </script>
     
 </body>
